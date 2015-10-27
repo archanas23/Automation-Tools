@@ -15,3 +15,6 @@ Script is used for converting tab separated file to csv.
 This script is used for validating test cases (source language C). 
 Test cases should be written in the format (Sample .tcf file is added in the files)
 This script can be executed with PERL 5.14v
+
+4)Objectives
+When we write test cases from a C function and there is a need to test each variable and call, given the sample test case file this script can generate objectives to write a test from a function
