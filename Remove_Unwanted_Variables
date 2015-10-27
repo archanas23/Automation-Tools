@@ -1,0 +1,50 @@
+use Win32;
+
+$file_path=$ARGV[0];
+
+open(F,"<","$file_path.tcf") or die $!;
+
+$tcf_file1 = join("_Removed","$file_path",".tcf");
+open(R,">","$tcf_file1") or die $!;
+while(<F>)
+{
+   if(/# Begin Removed Variable/)
+   {
+      while(<F>){ last if(/# End Removed Variable/); }
+      while(<F>){ last; }
+   }
+   elsif(/# Begin Sysearch Include File Entries/)
+   {
+   print R $_;
+   while(<F>){ last if(/# End Sysearch Include File Entries/); }
+   print R "\n";
+   print R $_;
+   }
+   elsif(/# Begin Sysppvar Preprocessor Macros/)
+   {
+   print R $_;
+   while(<F>){ last if(/# End Sysppvar Preprocessor Macros/); }
+   print R "\n";
+   print R $_;
+   }
+   elsif(/Tool Dir = %MICROCHIP_C18_PATH%\\bin\\/)
+   {
+   $_="    Tool Dir = C:\\Program Files (x86)\\Microchip\\MPLAB C30\\\\bin\\\n";
+   print R $_;
+   }
+   elsif(/Tool Lib Dir = %MICROCHIP_C18_PATH%\\lib/)
+   {
+   $_="    Tool Lib Dir = C:\\Program Files (x86)\\Microchip\\MPLAB C30\\\\lib\n";
+   print R $_;
+   }
+   else{
+	 print R $_;
+   }
+}
+
+Win32::MsgBox ("TCF is cleaned up.\n\nGet the updated file from below path\n $tcf_file1",
+               64+0,
+			   TaskCompleted);
+close(F);
+close(R);
+
