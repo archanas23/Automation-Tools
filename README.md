@@ -18,3 +18,8 @@ This script can be executed with PERL 5.14v
 
 4)Objectives
 When we write test cases from a C function and there is a need to test each variable and call, given the sample test case file this script can generate objectives to write a test from a function
+
+5)Remove_Unwanted_Variable
+When a C code is used to test a hardware unit (any hardware unit), the output will unfortunately have unwanted variables, either from the compiler or the debugger. This script can be used in any embedded project provided the sample format of the test case is used. Otherwise, the logic can be used for any other test case files.
+
+
