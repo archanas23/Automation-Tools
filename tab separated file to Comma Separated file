@@ -1,0 +1,15 @@
+import os
+import sys
+import csv
+
+def convert(input, out):
+    if os.path.exists(out):
+        raise ValueError("File is present")
+
+    source = csv.reader(open(input, 'rU'), dialect=csv.excel_tab)
+    target = csv.writer(open(out, "wb+"), dialect="excel")
+    for row in source:
+        target.writerow(row)
+
+if __name__ == "__main__":
+    convert(sys.argv[1], sys.argv[2])
