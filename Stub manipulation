@@ -1,0 +1,79 @@
+#===============================================================================
+# This PERL script is to generate the objectives from Stub sections and appends
+# them to test cases. It also promts the user if the stub is not verified
+#
+# Input: XXXX.tcf
+#
+# Output: XXXX_upd.tcf
+#
+#===============================================================================
+
+#use strict;
+use warnings;
+use Cwd;
+use Win32;
+
+$M=$ARGV[0];
+
+my $tcNum=0; my $objNum=0; my $stubName=""; my $line; my %items; my %params;
+
+
+open(F,"$M") or die $!;
+while(<F>){
+	$tcNum = $1 if(/^\s*Description\s*=\s*TEST\s*M(\d+)\s*$/);
+	if(/^\s*#\s*Begin\s*TC\s*Stub\s*$/){
+		while(<F>){
+			if(/^\s*Procedure\s*=\s*(\S+)\s*$/){ $stubName = $1; $params{$tcNum}{$stubName}=""; }
+			if(/^\s*Specified\s*=\s*(\d+)\s*$/){ $items{$tcNum}{$stubName} = $1; last; }
+			if(/^\s*#\s*Begin\s*TC\s*Stub\s*Input\s*Params\s*$/){
+				while(<F>){
+					if(/^\s*Name\s*=\s*(\S+)\s*$/){ $params{$tcNum}{$stubName} .= "\n      $1"; }
+					if(/^\s*Value\s*=\s*(\S+)\s*$/){ $params{$tcNum}{$stubName} .= " : $1"; last; }
+				}
+			}
+			if(/^\s*#\s*Begin\s*TC\s*Stub\s*Return\s*Value\s*$/){
+				while(<F>){
+					if(/^\s*Value\s*=\s*(\S+)\s*$/){ $params{$tcNum}{$stubName} .= "\n      Return Value : $1"; last; }
+				}
+			}
+			if(/^\s*#\s*End\s*TC\s*Stub\s*TC\s*Hit\s*Count\s*$/){ $items{$tcNum}{$stubName} = 0; last; }
+			if(/^\s*#\s*End\s*TC\s*Stub\s*$/){ 
+				Win32::MsgBox ("Hit count of '$stubName' is not verified in M$tcNum",16+0,Error);
+				$items{$tcNum}{$stubName} = 0; 
+				last;
+			}
+		}
+	}
+	$stubName="";
+}
+close(F);
+
+my $out=$M;
+$out=~ s/\.tcf/_upd.tcf/;	
+open(O,">","$out") or die $!;
+open(F,"$M") or die $!;
+while(<F>){
+	$tcNum = $1 if(/^\s*Description\s*=\s*TEST\s*M(\d+)\s*$/);
+	$objNum = $1 if(/^\s*(\d+)\s*(.*)/);
+	if(/^\s*Control\s*Flow\s*:/){ $line = $_;
+		if(exists($items{$tcNum})){ print O ""; }
+		foreach(keys %{$items{$tcNum}}){
+			$objNum=$objNum+1;
+			print O " ".$objNum.". To verify that the \"".$_."\" stub is getting hit ".$items{$tcNum}{$_}." time(s)\n";
+			if($params{$tcNum}{$_} ne ""){ print O "   with the following values".$params{$tcNum}{$_}."\n\n";}
+			else{ print O "\n";}
+	}
+	   print O "$line";
+	   $objNum=0;
+	}
+	else
+	{
+		print O $_;
+	}
+}
+Win32::MsgBox ("TCF is updated\n\nGet the updated file from below path\n $out",
+			   64+0,
+			   TaskCompleted);
+close(F);
+close(O);
+
