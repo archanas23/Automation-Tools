@@ -31,6 +31,14 @@ $target = "$dir/$folder";
 #copy it to the destination folder
 copy $source => $target or warn "Copy of $file failed: $!";
 }
+#renaming the file
+foreach (@file_of_dir)
+{
+$new=$_;
+$new=~ s/.xls/_TP.xls/ if($_ =~ m/.xls$/);
+$new=~ s/.xlsx/_TP.xlsx/ if($_ =~ m/.xlsx$/);
+rename("$path/$_", "$path/$new");
+}
 }
 
 
